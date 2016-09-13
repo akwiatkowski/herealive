@@ -1,3 +1,3 @@
-get "/" do
+get "/count" do
   User.count
 end
