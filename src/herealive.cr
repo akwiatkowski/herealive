@@ -1,6 +1,6 @@
 require "crystal_api"
 
-require "./herealive/*"
+require "./herealive/server"
 
 module Herealive
 end
