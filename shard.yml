@@ -1,0 +1,12 @@
+name: herealive
+version: 0.1.0
+
+authors:
+  - Aleksander Kwiatkowski <bobikx@poczta.fm>
+
+license: GPLv3
+
+dependencies:
+  crystal_api:
+    github: akwiatkowski/crystal_api
+    branch: master

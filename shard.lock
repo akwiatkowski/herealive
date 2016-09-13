@@ -1,0 +1,30 @@
+version: 1.0
+shards:
+  crystal_api:
+    github: akwiatkowski/crystal_api
+    commit: 1b2213c60974611371c7b357084e3097a54ef80c
+
+  jwt:
+    github: akwiatkowski/crystal-jwt
+    commit: f0bf2608dc6a38362c686cb47b2f52a67672c495
+
+  kemal:
+    github: sdogruyol/kemal
+    commit: 7c8915bfa4c10f98e065315816a2f689cc78d945
+
+  kemal-auth-token:
+    github: akwiatkowski/kemal-auth-token
+    commit: 8ca2e4f2ce9b8dce9ed2679204466dc55a1d24e8
+
+  kilt:
+    github: jeromegn/kilt
+    version: 0.3.3
+
+  pg:
+    github: will/crystal-pg
+    commit: cafe0b858007ad09ee67253c90d41ed7647628c4
+
+  radix:
+    github: luislavena/radix
+    version: 0.3.1
+
