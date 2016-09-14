@@ -8,13 +8,34 @@
       context.app.swap('');
       return context.render("/templates/index.haml").appendTo(context.$element());
     });
-    return this.get("#/sign_up", function(context) {
+    this.get("#/sign_up", function(context) {
       context.app.swap('');
       return context.render("/templates/sign_up.haml").appendTo(context.$element());
+    });
+    return this.post("#/sign_up/submit", function(context) {
+      alert(this.params);
+      return $.ajax({
+        type: "POST",
+        url: "/api/sign_up/",
+        data: {
+          password: this.params['password'],
+          email: this.params['email']
+        },
+        dataType: "JSON"
+      }).done(function(executeData) {
+        alert(1);
+        context.app.swap('');
+        return context.render("/templates/post_sign_up.haml").appendTo(context.$element());
+      });
     });
   });
 
   $(function() {
+    $('form').submit((function(_this) {
+      return function() {
+        return console.log(_this);
+      };
+    })(this));
     return app.run("#/");
   });
 

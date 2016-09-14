@@ -2,7 +2,7 @@ version: 1.0
 shards:
   crystal_api:
     github: akwiatkowski/crystal_api
-    commit: fbbf05a0e98529b3af9cb04104e6d51d01b82108
+    commit: 5743268ea84ac2a0451152652a7d087c1a021f3d
 
   jwt:
     github: akwiatkowski/crystal-jwt

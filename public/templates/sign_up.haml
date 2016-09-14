@@ -1,1 +1,13 @@
 %p Signup
+
+%form.pure-form{action:"#/sign_up/submit", method: "post"}
+  %fieldset
+    %legend
+      Type your email and password
+
+      &nbsp;
+      %input{type: "text", name: "email", placeholder: "Email"}
+      %input{type: "password", name: "password", placeholder: "Password"}
+
+      &nbsp;
+      %input{type: "submit", value: "Sign in", class: "pure-button pure-button-primary action-execute-button"}

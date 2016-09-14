@@ -2,17 +2,23 @@ crystal_model(
   User,
   id : (Int32 | Nil) = nil,
   email : (String | Nil) = nil,
-  hashed_password : (String | Nil) = nil
+  hashed_password : (String | Nil) = nil,
+  created_at : (Time | Nil) = nil,
+  updated_at : (Time | Nil) = nil
 )
 crystal_resource(user, users, User)
 
 
 struct User
+  def self.hash_password(p : String) : String
+    return Crypto::MD5.hex_digest(p)
+  end
+
   # Return id in UserHash if user is signed ok
   def self.sign_in(email : String, password : String) : UserHash
     h = {
       "email"           => email,
-      "hashed_password" => Crypto::MD5.hex_digest(password),
+      "hashed_password" => hash_password(password),
     }
 
     # try sign in using handle
@@ -40,5 +46,14 @@ struct User
       uh["email"] = user.email
     end
     return uh
+  end
+
+  def self.register(email : String, password : String)
+    User.create({
+      "email" => email,
+      "hashed_password" => hash_password(password),
+      "created_at" => Time.now,
+      "updated_at" => Time.now
+    })
   end
 end
