@@ -1,4 +1,6 @@
 auth_token_mw = Kemal::AuthToken.new
+auth_token_mw.path = "/api/sign_in"
+
 auth_token_mw.sign_in do |email, password|
   User.sign_in(email, password)
 end

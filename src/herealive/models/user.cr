@@ -10,6 +10,7 @@ crystal_resource(user, users, User)
 
 
 struct User
+
   def self.hash_password(p : String) : String
     return Crypto::MD5.hex_digest(p)
   end
@@ -55,5 +56,10 @@ struct User
       "created_at" => Time.now,
       "updated_at" => Time.now
     })
+  end
+
+  def self.validate(email : String, password : String)
+    # TODO check existing email and regexp it
+    return true if email.size > 3 && password.size > 3
   end
 end

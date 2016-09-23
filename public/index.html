@@ -15,6 +15,7 @@
   <script src="/js/jquery-3.1.0.min.js"></script>
   <script src="/js/jquery-ui.min.js"></script>
   <script src="/js/sammy-latest.min.js"></script>
+  <script src="/js/sammy.storage.js"></script>
   <script src="/js/haml.js"></script>
   <script src="/js/sammy.haml.js"></script>
   <script src="/js/pure-ui.js"></script>
@@ -34,9 +35,16 @@
     <div class="pure-menu pure-menu-horizontal">
       <a class="pure-menu-heading" href="#/">Here and Alive</a>
 
-      <ul class="pure-menu-list">
+      <ul class="pure-menu-list user-not-signed">
         <li class="pure-menu-item"><a href="#/sign_up" class="pure-menu-link">Sign up</a></li>
+        <li class="pure-menu-item"><a href="#/sign_in" class="pure-menu-link">Sign in</a></li>
       </ul>
+
+      <ul class="pure-menu-list user-signed hidden">
+        <li class="pure-menu-item"><a href="#/profile" class="pure-menu-link profile-email">Profile</a></li>
+        <li class="pure-menu-item"><a href="#/sign_out" class="pure-menu-link">Sign out</a></li>
+      </ul>
+
     </div>
   </div>
 
