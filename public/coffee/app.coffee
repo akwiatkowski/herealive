@@ -89,10 +89,59 @@ app = $.sammy("#main", ->
       url: "api/profile"
       headers: {"X-Token": cu.auth_token}
     ).done (d) ->
-      console.log(d)
       context.app.swap('')
       context.render("/templates/profile.haml", d).appendTo context.$element()
 
+  @get "#/ping", (context) ->
+    showPosition = (position) ->
+      # copy data to form
+      $("#lat").val( position.coords.latitude )
+      $("#lon").val( position.coords.longitude )
+      $("#accuracy").val( position.coords.accuracy )
+      $("#altitude").val( position.coords.altitude )
+      $("#altitudeAccuracy").val( position.coords.altitudeAccuracy )
+      $("#heading").val( position.coords.heading )
+      $("#speed").val( position.coords.speed )
+
+    if navigator.geolocation
+      navigator.geolocation.getCurrentPosition showPosition
+
+    cu = currentUser()
+    context.app.swap('')
+    context.render("/templates/ping.haml").appendTo context.$element()
+
+  # submit current position and state (alive)
+  @post "#/ping/submit", (context) ->
+    cu = currentUser()
+
+    hash =
+      accuracy: @params.accuracy
+      altitude: @params.altitude
+      altitudeAccuracy: @params.altitudeAccuracy
+      heading: @params.heading
+      lat: @params.lat
+      lon: @params.lon
+      place: @params.place
+      speed: @params.speed
+      source: "js"
+
+    console.log(hash)
+
+    $.ajax(
+      type: "POST"
+      url: "/api/ping"
+      data: hash
+      headers: {"X-Token": cu.auth_token}
+      dataType: "JSON"
+    ).then ( (d) -> # created ping
+      console.log(d)
+      context.redirect("#/")
+    ), ( (d) -> # failed to create ping
+      console.log "Error"
+      context.redirect("#/")
+    ), -> # deferred
+      console.log "Deferred"
+      context.redirect("#/")
 
   # @post "#/sign_in/submit", (context) ->
   #   $.ajax(

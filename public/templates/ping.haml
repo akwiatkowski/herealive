@@ -1,0 +1,23 @@
+%h2 Announce that you are alive
+
+%form.pure-form.pure-form-aligned{action:"#/ping/submit", method: "post"}
+  :each n in ["accuracy", "altitude", "altitudeAccuracy", "heading", "speed"]
+    %input{type: "hidden", id: n, name: n}
+
+  %fieldset
+
+    .pure-control-group
+      %label{for: "place"} Place
+      %input{type: "text", id: "place", name: "place", placeholder: "Place"}
+
+    .pure-control-group
+      %label{for: "lat"} Latitude
+      %input{type: "text", id: "lat", name: "lat", placeholder: "Latitude"}
+
+    .pure-control-group
+      %label{for: "lon"} Longitude
+      %input{type: "text", id: "lon", name: "lon", placeholder: "Longitude"}
+
+    .pure-control-group
+      %label{}
+      %input{type: "submit", value: "Sign in", class: "pure-button pure-button-primary action-execute-button"}

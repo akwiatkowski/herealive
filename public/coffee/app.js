@@ -97,7 +97,7 @@
         return context.redirect("#/");
       });
     });
-    return this.get("#/profile", function(context) {
+    this.get("#/profile", function(context) {
       var cu;
       cu = currentUser();
       return $.ajax({
@@ -106,9 +106,60 @@
           "X-Token": cu.auth_token
         }
       }).done(function(d) {
-        console.log(d);
         context.app.swap('');
         return context.render("/templates/profile.haml", d).appendTo(context.$element());
+      });
+    });
+    this.get("#/ping", function(context) {
+      var cu, showPosition;
+      showPosition = function(position) {
+        $("#lat").val(position.coords.latitude);
+        $("#lon").val(position.coords.longitude);
+        $("#accuracy").val(position.coords.accuracy);
+        $("#altitude").val(position.coords.altitude);
+        $("#altitudeAccuracy").val(position.coords.altitudeAccuracy);
+        $("#heading").val(position.coords.heading);
+        return $("#speed").val(position.coords.speed);
+      };
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      }
+      cu = currentUser();
+      context.app.swap('');
+      return context.render("/templates/ping.haml").appendTo(context.$element());
+    });
+    return this.post("#/ping/submit", function(context) {
+      var cu, hash;
+      cu = currentUser();
+      hash = {
+        accuracy: this.params.accuracy,
+        altitude: this.params.altitude,
+        altitudeAccuracy: this.params.altitudeAccuracy,
+        heading: this.params.heading,
+        lat: this.params.lat,
+        lon: this.params.lon,
+        place: this.params.place,
+        speed: this.params.speed,
+        source: "js"
+      };
+      console.log(hash);
+      return $.ajax({
+        type: "POST",
+        url: "/api/ping",
+        data: hash,
+        headers: {
+          "X-Token": cu.auth_token
+        },
+        dataType: "JSON"
+      }).then((function(d) {
+        console.log(d);
+        return context.redirect("#/");
+      }), (function(d) {
+        console.log("Error");
+        return context.redirect("#/");
+      }), function() {
+        console.log("Deferred");
+        return context.redirect("#/");
       });
     });
   });
