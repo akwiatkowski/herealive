@@ -124,6 +124,7 @@ app = $.sammy("#main", ->
       place: @params.place
       speed: @params.speed
       source: "js"
+      location: @params.location
 
     console.log(hash)
 

@@ -140,7 +140,8 @@
         lon: this.params.lon,
         place: this.params.place,
         speed: this.params.speed,
-        source: "js"
+        source: "js",
+        location: this.params.location
       };
       console.log(hash);
       return $.ajax({

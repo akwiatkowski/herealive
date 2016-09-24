@@ -39,12 +39,24 @@ post "/api/ping" do |env|
 
 
   if cu["id"]?
-    h = {
-      "user_id" => cu["id"].to_s.to_i,
-      "lat" => params["lat"].to_s.to_f,
-      "lon" => params["lon"].to_s.to_f,
-      "manually" => true
-    }
+    manually = true
+    manually = false if params["lat"].to_s == "app_auto"
+
+    h = Hash(String, (Int32 | Float64 | String | Bool)).new
+
+    h["user_id"] = cu["id"].to_s.to_i
+    h["lat"] = params["lat"].to_s.to_f if params["lat"].to_s != ""
+    h["lon"] = params["lon"].to_s.to_f if params["lon"].to_s != ""
+    h["accuracy"] = params["accuracy"].to_s.to_i if params["accuracy"].to_s != ""
+    h["altitude"] = params["altitude"].to_s.to_i if params["altitude"].to_s != ""
+    h["altitudeAccuracy"] = params["altitudeAccuracy"].to_s.to_i if params["altitudeAccuracy"].to_s != ""
+    h["heading"] = params["heading"].to_s.to_i if params["heading"].to_s != ""
+    h["speed"] = params["speed"].to_s.to_i if params["speed"].to_s != ""
+    h["manually"] = manually
+
+    h["source"] = params["source"].to_s
+    h["location"] = params["location"].to_s
+
     ping = Ping.create(h)
     ping.to_json
   else
