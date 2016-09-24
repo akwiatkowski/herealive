@@ -11,7 +11,6 @@ storeCurrentUser = (email, auth_token) ->
   token = store.set('auth_token', auth_token)
   email = store.set('email', email)
 
-
 app = $.sammy("#main", ->
   @use "Haml"
   @use "Session"
@@ -22,7 +21,7 @@ app = $.sammy("#main", ->
     template = "/templates/index.haml"
 
     cu = currentUser()
-    if cu.auth_token == ""
+    if cu.auth_token == "null" || cu.auth_token == null
       template = "/templates/index_unsigned.haml"
 
     context.render(template,
@@ -31,7 +30,7 @@ app = $.sammy("#main", ->
 
   # log off
   @get "#/sign_out", (context) ->
-    storeCurrentUser("", "")
+    storeCurrentUser(null, null)
     context.redirect("#/")
 
   # sign in/up
@@ -86,25 +85,34 @@ app = $.sammy("#main", ->
     cu = currentUser()
 
     $.ajax(
-      url: "api/profile"
+      url: "/api/profile"
       headers: {"X-Token": cu.auth_token}
-    ).done (d) ->
+    ).then ( (d) -> # profile can be loaded
       context.app.swap('')
       context.render("/templates/profile.haml", d).appendTo context.$element()
+    ), (-> # profile cannot be loaded
+      storeCurrentUser(null, null)
+      context.redirect("#/")
+    ), -> # deferred when trying to sign in previously signed up user
+      console.log "Deferred"
+      context.redirect("#/")
 
   @get "#/ping", (context) ->
-    showPosition = (position) ->
-      # copy data to form
-      $("#lat").val( position.coords.latitude )
-      $("#lon").val( position.coords.longitude )
-      $("#accuracy").val( position.coords.accuracy )
-      $("#altitude").val( position.coords.altitude )
-      $("#altitudeAccuracy").val( position.coords.altitudeAccuracy )
-      $("#heading").val( position.coords.heading )
-      $("#speed").val( position.coords.speed )
 
     if navigator.geolocation
-      navigator.geolocation.getCurrentPosition showPosition
+      navigator.geolocation.getCurrentPosition ((position) ->
+        $("#lat").val( position.coords.latitude )
+        $("#lon").val( position.coords.longitude )
+        $("#accuracy").val( position.coords.accuracy )
+        $("#altitude").val( position.coords.altitude )
+        $("#altitudeAccuracy").val( position.coords.altitudeAccuracy )
+        $("#heading").val( position.coords.heading )
+        $("#speed").val( position.coords.speed )
+      ), ((error) ->
+        alert error.message
+      ),
+        enableHighAccuracy: true
+        timeout: 5000
 
     cu = currentUser()
     context.app.swap('')
@@ -126,8 +134,6 @@ app = $.sammy("#main", ->
       source: "js"
       location: @params.location
 
-    console.log(hash)
-
     $.ajax(
       type: "POST"
       url: "/api/ping"
@@ -136,11 +142,30 @@ app = $.sammy("#main", ->
       dataType: "JSON"
     ).then ( (d) -> # created ping
       console.log(d)
-      context.redirect("#/")
+      context.redirect("#/ping/last")
     ), ( (d) -> # failed to create ping
       console.log "Error"
-      context.redirect("#/")
+      context.redirect("#/ping")
     ), -> # deferred
+      console.log "Deferred"
+      context.redirect("#/ping")
+
+    console.log(hash)
+
+
+  @get "#/ping/last", (context) ->
+    cu = currentUser()
+
+    $.ajax(
+      url: "/api/ping/last"
+      headers: {"X-Token": cu.auth_token}
+    ).then ( (d) -> # last ping can be loaded
+      console.log(d)
+      context.app.swap('')
+      context.render("/templates/ping_show.haml", {resource: d}).appendTo context.$element()
+    ), (-> # last ping cannot be loaded
+      context.redirect("#/")
+    ), -> # last ping deferred
       console.log "Deferred"
       context.redirect("#/")
 

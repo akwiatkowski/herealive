@@ -1,0 +1,21 @@
+%h2 Last ping
+
+:if resource
+  %p
+    Last Ping was created
+    &nbsp;
+    %strong
+      :if resource.manually
+        manually
+      :else
+        automatically
+    &nbsp;
+    by user at
+    &nbsp;
+    %strong= new Date(resource.created_at)
+    .
+
+  :if resource.lat && resource.lon
+    %p
+      %a{href: "http://mapa.ump.waw.pl/ump-www/?zoom=13&lat=" + resource.lat + "&lon=" + resource.lon + "&layers=B000000FFFFTFF&mlat=" + resource.lat + "53.90543&mlon=" + resource.lon, target: "_blank"}
+        Map link

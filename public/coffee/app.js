@@ -36,7 +36,7 @@
       context.app.swap('');
       template = "/templates/index.haml";
       cu = currentUser();
-      if (cu.auth_token === "") {
+      if (cu.auth_token === "null" || cu.auth_token === null) {
         template = "/templates/index_unsigned.haml";
       }
       return context.render(template, {
@@ -44,7 +44,7 @@
       }).appendTo(context.$element());
     });
     this.get("#/sign_out", function(context) {
-      storeCurrentUser("", "");
+      storeCurrentUser(null, null);
       return context.redirect("#/");
     });
     this.post("#/sign_in/submit", function(context) {
@@ -101,34 +101,44 @@
       var cu;
       cu = currentUser();
       return $.ajax({
-        url: "api/profile",
+        url: "/api/profile",
         headers: {
           "X-Token": cu.auth_token
         }
-      }).done(function(d) {
+      }).then((function(d) {
         context.app.swap('');
         return context.render("/templates/profile.haml", d).appendTo(context.$element());
+      }), (function() {
+        storeCurrentUser(null, null);
+        return context.redirect("#/");
+      }), function() {
+        console.log("Deferred");
+        return context.redirect("#/");
       });
     });
     this.get("#/ping", function(context) {
-      var cu, showPosition;
-      showPosition = function(position) {
-        $("#lat").val(position.coords.latitude);
-        $("#lon").val(position.coords.longitude);
-        $("#accuracy").val(position.coords.accuracy);
-        $("#altitude").val(position.coords.altitude);
-        $("#altitudeAccuracy").val(position.coords.altitudeAccuracy);
-        $("#heading").val(position.coords.heading);
-        return $("#speed").val(position.coords.speed);
-      };
+      var cu;
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
+        navigator.geolocation.getCurrentPosition((function(position) {
+          $("#lat").val(position.coords.latitude);
+          $("#lon").val(position.coords.longitude);
+          $("#accuracy").val(position.coords.accuracy);
+          $("#altitude").val(position.coords.altitude);
+          $("#altitudeAccuracy").val(position.coords.altitudeAccuracy);
+          $("#heading").val(position.coords.heading);
+          return $("#speed").val(position.coords.speed);
+        }), (function(error) {
+          return alert(error.message);
+        }), {
+          enableHighAccuracy: true,
+          timeout: 5000
+        });
       }
       cu = currentUser();
       context.app.swap('');
       return context.render("/templates/ping.haml").appendTo(context.$element());
     });
-    return this.post("#/ping/submit", function(context) {
+    this.post("#/ping/submit", function(context) {
       var cu, hash;
       cu = currentUser();
       hash = {
@@ -143,8 +153,7 @@
         source: "js",
         location: this.params.location
       };
-      console.log(hash);
-      return $.ajax({
+      $.ajax({
         type: "POST",
         url: "/api/ping",
         data: hash,
@@ -154,9 +163,31 @@
         dataType: "JSON"
       }).then((function(d) {
         console.log(d);
-        return context.redirect("#/");
+        return context.redirect("#/ping/last");
       }), (function(d) {
         console.log("Error");
+        return context.redirect("#/ping");
+      }), function() {
+        console.log("Deferred");
+        return context.redirect("#/ping");
+      });
+      return console.log(hash);
+    });
+    return this.get("#/ping/last", function(context) {
+      var cu;
+      cu = currentUser();
+      return $.ajax({
+        url: "/api/ping/last",
+        headers: {
+          "X-Token": cu.auth_token
+        }
+      }).then((function(d) {
+        console.log(d);
+        context.app.swap('');
+        return context.render("/templates/ping_show.haml", {
+          resource: d
+        }).appendTo(context.$element());
+      }), (function() {
         return context.redirect("#/");
       }), function() {
         console.log("Deferred");
