@@ -43,7 +43,7 @@
         currentUser: cu
       }).appendTo(context.$element());
     });
-    this.get("#/sign_off", function(context) {
+    this.get("#/sign_out", function(context) {
       storeCurrentUser("", "");
       return context.redirect("#/");
     });
@@ -60,47 +60,56 @@
         url: "/api/sign_in",
         data: hash,
         dataType: "JSON"
-      }).done(function(d1) {
+      }).then((function(d1) {
         storeCurrentUser(email, d1['token']);
         return context.redirect("#/");
-      }).fail(function(executeData) {
+      }), (function(d1) {
         return $.ajax({
           type: "POST",
           url: "/api/sign_up",
           data: hash,
           dataType: "JSON"
-        }).done(function(d2) {
+        }).then((function() {
           return $.ajax({
             type: "POST",
             url: "/api/sign_in",
             data: hash,
             dataType: "JSON"
-          }).done(function(d3) {
+          }).then((function(d3) {
             storeCurrentUser(email, d3['token']);
             return context.redirect("#/");
-          }).fail(function(d3) {
+          }), (function() {
             alert("Internal error while signing in after sign up");
             return context.redirect("#/");
-          }).fail(function(d2) {
-            alert("Error while sign up");
+          }), function() {
+            console.log("D3 deferred");
             return context.redirect("#/");
           });
+        }), (function() {
+          alert("Error while sign up");
+          return context.redirect("#/");
+        }), function() {
+          console.log("D2 deferred");
+          return context.redirect("#/");
         });
+      }), function() {
+        console.log("D1 deferred");
+        return context.redirect("#/");
       });
     });
-    this.get("#/sign_up", function(context) {
-      context.app.swap('');
-      return context.render("/templates/sign_up.haml").appendTo(context.$element());
-    });
-    this.get("#/sign_in", function(context) {
-      context.app.swap('');
-      return context.render("/templates/sign_in.haml").appendTo(context.$element());
-    });
     return this.get("#/profile", function(context) {
-      context.app.swap('');
-      return context.render("/templates/profile.haml", {
-        email: "Email"
-      }).appendTo(context.$element());
+      var cu;
+      cu = currentUser();
+      return $.ajax({
+        url: "api/profile",
+        headers: {
+          "X-Token": cu.auth_token
+        }
+      }).done(function(d) {
+        console.log(d);
+        context.app.swap('');
+        return context.render("/templates/profile.haml", d).appendTo(context.$element());
+      });
     });
   });
 

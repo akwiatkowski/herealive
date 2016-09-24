@@ -24,6 +24,11 @@ post "/api/sign_up" do |env|
   end
 end
 
+get "/api/profile" do |env|
+  env.response.content_type = "application/json"
+  env.current_user.to_json
+end
+
 get "/count" do
   User.count
 end

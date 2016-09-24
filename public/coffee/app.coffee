@@ -12,24 +12,6 @@ storeCurrentUser = (email, auth_token) ->
   email = store.set('email', email)
 
 
-# refreshProfile = ->
-#   $(".user-not-signed").hide()
-#   $(".user-signed").hide()
-#
-#   store = new Sammy.Store({name: 'hereandalive', element: 'body', type: 'local'})
-#   token = store.get('auth_token')
-#   email = store.get('email')
-#
-#   if token
-#     $(".user-signed").show()
-#     $(".user-not-signed").hide()
-#
-#     $(".profile-email").innerHtml(email)
-#   else
-#     $(".user-signed").hide()
-#     $(".user-not-signed").show()
-
-
 app = $.sammy("#main", ->
   @use "Haml"
   @use "Session"
@@ -48,10 +30,11 @@ app = $.sammy("#main", ->
     ).appendTo context.$element()
 
   # log off
-  @get "#/sign_off", (context) ->
+  @get "#/sign_out", (context) ->
     storeCurrentUser("", "")
     context.redirect("#/")
 
+  # sign in/up
   @post "#/sign_in/submit", (context) ->
     email = @params['password']
     password = @params['email']
@@ -64,53 +47,51 @@ app = $.sammy("#main", ->
       url: "/api/sign_in"
       data: hash
       dataType: "JSON"
-    ).done (d1) ->
-      # user is in DB
+    ).then ( (d1) -> # user is in DB
       storeCurrentUser(email, d1['token'])
       context.redirect("#/")
-    .fail (executeData) ->
-      # try to sign up
+    ), ( (d1) -> # try to sign up
       $.ajax(
         type: "POST"
         url: "/api/sign_up"
         data: hash
         dataType: "JSON"
-      ).done (d2) ->
-        # user was created, execute sign in
+      ).then (-> # user was created, execute sign in
         $.ajax(
           type: "POST"
           url: "/api/sign_in"
           data: hash
           dataType: "JSON"
-        ).done (d3) ->
-          # user is in DB, already sign in
+        ).then ( (d3) -> # user is in DB, already sign in
           storeCurrentUser(email, d3['token'])
           context.redirect("#/")
-        .fail (d3) ->
+        ), (-> # user created but cannot sign in
           alert("Internal error while signing in after sign up")
           context.redirect("#/")
-        .fail (d2) ->
-          alert("Error while sign up")
+        ), -> # deferred when trying to sign in previously signed up user
+          console.log "D3 deferred"
           context.redirect("#/")
+      ), (-> # user was not created
+        alert("Error while sign up")
+        context.redirect("#/")
+      ), -> # deferred when trying to sign up
+        console.log "D2 deferred"
+        context.redirect("#/")
+    ), -> # deferred when trying to sign in
+      console.log "D1 deferred"
+      context.redirect("#/")
 
-
-  ##################3
-  @get "#/sign_up", (context) ->
-    context.app.swap('')
-    context.render("/templates/sign_up.haml",
-    ).appendTo context.$element()
-
-  @get "#/sign_in", (context) ->
-    context.app.swap('')
-    context.render("/templates/sign_in.haml",
-    ).appendTo context.$element()
 
   @get "#/profile", (context) ->
-    context.app.swap('')
-    context.render("/templates/profile.haml",
-      email: "Email"
-    ).appendTo context.$element()
+    cu = currentUser()
 
+    $.ajax(
+      url: "api/profile"
+      headers: {"X-Token": cu.auth_token}
+    ).done (d) ->
+      console.log(d)
+      context.app.swap('')
+      context.render("/templates/profile.haml", d).appendTo context.$element()
 
 
   # @post "#/sign_in/submit", (context) ->
