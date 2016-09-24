@@ -1,0 +1,22 @@
+%h2 Hello stranger
+
+%p Please sign in or sign up
+
+%form.pure-form.pure-form-aligned{action:"#/sign_in/submit", method: "post"}
+  %fieldset
+
+    .pure-control-group
+      %label{for: "email"} Email
+      %input{type: "text", name: "email", placeholder: "Email"}
+
+    .pure-control-group
+      %label{for: "password"} Password
+      %input{type: "password", name: "password", placeholder: "Password"}
+
+    .pure-control-group
+      %label{for: "allow_signup"} Create account if not exists
+      %input{type: "checkbox", name: "allow_signup", checked: true}
+
+    .pure-control-group
+      %label{}
+      %input{type: "submit", value: "Sign in", class: "pure-button pure-button-primary action-execute-button"}
