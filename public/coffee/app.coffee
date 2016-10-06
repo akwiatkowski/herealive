@@ -169,6 +169,22 @@ app = $.sammy("#main", ->
       console.log "Deferred"
       context.redirect("#/")
 
+  @get "#/ping/route", (context) ->
+    cu = currentUser()
+
+    $.ajax(
+      url: "/api/ping"
+      headers: {"X-Token": cu.auth_token}
+    ).then ( (d) -> # last ping can be loaded
+      console.log(d)
+      context.app.swap('')
+      context.render("/templates/ping_index.haml", {collection: d}).appendTo context.$element()
+    ), (-> # last ping cannot be loaded
+      context.redirect("#/")
+    ), -> # last ping deferred
+      console.log "Deferred"
+      context.redirect("#/")
+
   # @post "#/sign_in/submit", (context) ->
   #   $.ajax(
   #     type: "POST"

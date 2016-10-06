@@ -1,0 +1,14 @@
+%h2 Route
+
+:if collection
+  %p
+    User pinged
+    &nbsp;
+    %strong
+      = collection.length
+    &nbsp;
+    times.
+
+- roadmap = ""
+- $.each(collection, function(idx, val) { roadmap += "&markers=" + val.lat + "," + val.lon })
+%a{href: "https://maps.googleapis.com/maps/api/staticmap?zoom=13&size=1980x1080&maptype=roadmap" + roadmap, target: "_blank"} Map

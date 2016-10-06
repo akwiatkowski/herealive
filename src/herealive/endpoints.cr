@@ -75,6 +75,19 @@ get "/api/ping/last" do |env|
   ping.to_json
 end
 
+get "/api/ping" do |env|
+  env.response.content_type = "application/json"
+  cu = env.current_user
+
+  ping = Ping.fetch_all(
+    where: {"user_id" => cu["id"].to_s.to_i},
+    order: "pings.id DESC",
+    limit: 5
+  )
+  ping.to_json
+end
+
+
 get "/count" do
   User.count
 end

@@ -10,10 +10,16 @@
       :else
         automatically
     &nbsp;
+    with
+    &nbsp;
+    %strong
+      = resource.source
+    &nbsp;
     by user at
     &nbsp;
     %strong= new Date(resource.created_at)
     .
+
 
   :if resource.lat && resource.lon
     %p

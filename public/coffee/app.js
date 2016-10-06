@@ -173,7 +173,7 @@
       });
       return console.log(hash);
     });
-    return this.get("#/ping/last", function(context) {
+    this.get("#/ping/last", function(context) {
       var cu;
       cu = currentUser();
       return $.ajax({
@@ -186,6 +186,27 @@
         context.app.swap('');
         return context.render("/templates/ping_show.haml", {
           resource: d
+        }).appendTo(context.$element());
+      }), (function() {
+        return context.redirect("#/");
+      }), function() {
+        console.log("Deferred");
+        return context.redirect("#/");
+      });
+    });
+    return this.get("#/ping/route", function(context) {
+      var cu;
+      cu = currentUser();
+      return $.ajax({
+        url: "/api/ping",
+        headers: {
+          "X-Token": cu.auth_token
+        }
+      }).then((function(d) {
+        console.log(d);
+        context.app.swap('');
+        return context.render("/templates/ping_index.haml", {
+          collection: d
         }).appendTo(context.$element());
       }), (function() {
         return context.redirect("#/");

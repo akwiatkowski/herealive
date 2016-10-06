@@ -59,7 +59,13 @@ struct User
   end
 
   def self.validate(email : String, password : String)
-    # TODO check existing email and regexp it
+    # check email uniq
+    return false if User.count(where: {"email" => email}).to_s.to_i > 0
+    # TODO email regexp
     return true if email.size > 3 && password.size > 3
+  end
+
+  def estimated_arrival(lat : Float64, lon : Float64)
+    return Time.now
   end
 end
