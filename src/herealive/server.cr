@@ -12,9 +12,14 @@ class Herealive::Server
     path = local_path if File.exists?(local_path)
     pg_connect_from_yaml(path)
 
-    # migrations
-    cm = CrystalMigrations.new("src/herealive/migrations")
-    cm.migrate
+    @cm = CrystalMigrations.new("src/herealive/migrations")
+  end
+
+  getter :cm
+
+  def start
+    # run migrations
+    @cm.migrate
 
     # port
     Kemal.config.port = 8005

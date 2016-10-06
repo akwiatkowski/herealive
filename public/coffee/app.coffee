@@ -152,6 +152,20 @@ app = $.sammy("#main", ->
 
     console.log(hash)
 
+  @get "#/u/:public_handle", (context) ->
+    console.log(context)
+
+    $.ajax(
+      url: "/api/u/" + context.params.public_handle
+    ).then ( (d) -> # last ping can be loaded
+      console.log(d)
+      context.app.swap('')
+      context.render("/templates/users/public.haml", {resource: d}).appendTo context.$element()
+    ), (-> # last ping cannot be loaded
+      context.redirect("#/")
+    ), -> # last ping deferred
+      console.log "Deferred"
+      context.redirect("#/")
 
   @get "#/ping/last", (context) ->
     cu = currentUser()

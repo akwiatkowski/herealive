@@ -173,6 +173,23 @@
       });
       return console.log(hash);
     });
+    this.get("#/u/:public_handle", function(context) {
+      console.log(context);
+      return $.ajax({
+        url: "/api/u/" + context.params.public_handle
+      }).then((function(d) {
+        console.log(d);
+        context.app.swap('');
+        return context.render("/templates/users/public.haml", {
+          resource: d
+        }).appendTo(context.$element());
+      }), (function() {
+        return context.redirect("#/");
+      }), function() {
+        console.log("Deferred");
+        return context.redirect("#/");
+      });
+    });
     this.get("#/ping/last", function(context) {
       var cu;
       cu = currentUser();

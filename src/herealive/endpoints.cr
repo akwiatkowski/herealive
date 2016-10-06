@@ -87,6 +87,25 @@ get "/api/ping" do |env|
   ping.to_json
 end
 
+get "/api/u/:public_handle" do |env|
+  # CrystalService.logging = true
+
+  env.response.content_type = "application/json"
+
+  if env.params.url["public_handle"]?
+    user = User.fetch_one(
+      where: {"public_handle" => env.params.url["public_handle"]}
+    )
+
+    if user
+      user.public.to_json
+    else
+      nil.to_json
+    end
+  else
+    nil.to_json
+  end
+end
 
 get "/count" do
   User.count

@@ -4,7 +4,8 @@ crystal_model(
   email : (String | Nil) = nil,
   hashed_password : (String | Nil) = nil,
   created_at : (Time | Nil) = nil,
-  updated_at : (Time | Nil) = nil
+  updated_at : (Time | Nil) = nil,
+  last_sign_in : (Time | Nil) = nil
 )
 crystal_resource(user, users, User)
 
@@ -28,6 +29,9 @@ struct User
     uh = UserHash.new
     if user
       uh["id"] = user.id
+
+      # mark last time of sign in
+      user.not_nil!.update({"last_sign_in" => Time.now})
     end
     return uh
   end
@@ -67,5 +71,38 @@ struct User
 
   def estimated_arrival(lat : Float64, lon : Float64)
     return Time.now
+  end
+
+  def active_pings(offset = 5, time_offset = Time::Span.new(1, 0, 0))
+    sql = "select * from pings where user_id = #{self.id} order by id DESC offset #{offset} limit 1;"
+    result = Ping.service.execute_sql(sql)
+    pings = crystal_resource_convert_ping(result)
+    if pings.size > 0
+      # get time and fetch
+      if pings[0].created_at
+        time_from = pings[0].created_at.not_nil! - time_offset
+        sql = "select * from pings where user_id = #{self.id} and pings.created_at > #{time_from} order by id DESC;"
+      else
+        sql = "select * from pings where user_id = #{self.id} order by id DESC limit #{offset};"
+      end
+
+      result = Ping.service.execute_sql(sql)
+      pings = crystal_resource_convert_ping(result)
+      return pings
+    else
+      return pings
+    end
+  end
+
+  def public
+    ap = active_pings
+
+    {
+      "email" => self.email,
+      "id" => self.id,
+      "created_at" => self.created_at,
+      "last_sign_in" => self.last_sign_in,
+      "active_pings" => ap
+    }
   end
 end
