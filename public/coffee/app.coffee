@@ -33,52 +33,91 @@ app = $.sammy("#main", ->
     storeCurrentUser(null, null)
     context.redirect("#/")
 
-  # sign in/up
+  # sign in
   @post "#/sign_in/submit", (context) ->
-    email = @params['password']
-    password = @params['email']
+    email = @params['email']
+    password = @params['password']
     hash =
-      password: email
-      email: password
+      password: password
+      email: email
 
     $.ajax(
       type: "POST"
       url: "/api/sign_in"
       data: hash
       dataType: "JSON"
-    ).then ( (d1) -> # user is in DB
+    ).done( (d1) -> # user is in DB
       storeCurrentUser(email, d1['token'])
       context.redirect("#/")
-    ), ( (d1) -> # try to sign up
-      $.ajax(
-        type: "POST"
-        url: "/api/sign_up"
-        data: hash
-        dataType: "JSON"
-      ).then (-> # user was created, execute sign in
-        $.ajax(
-          type: "POST"
-          url: "/api/sign_in"
-          data: hash
-          dataType: "JSON"
-        ).then ( (d3) -> # user is in DB, already sign in
-          storeCurrentUser(email, d3['token'])
-          context.redirect("#/")
-        ), (-> # user created but cannot sign in
-          alert("Internal error while signing in after sign up")
-          context.redirect("#/")
-        ), -> # deferred when trying to sign in previously signed up user
-          console.log "D3 deferred"
-          context.redirect("#/")
-      ), (-> # user was not created
-        alert("Error while sign up")
-        context.redirect("#/")
-      ), -> # deferred when trying to sign up
-        console.log "D2 deferred"
-        context.redirect("#/")
-    ), -> # deferred when trying to sign in
-      console.log "D1 deferred"
+    ).error( (d1) -> # error when sign in
+      storeCurrentUser(null, null)
       context.redirect("#/")
+    )
+
+  # sign up
+  @post "#/sign_up/submit", (context) ->
+    email = @params['email']
+    password = @params['password']
+    hash =
+      password: password
+      email: email
+
+    $.ajax(
+      type: "POST"
+      url: "/api/sign_up"
+      data: hash
+      dataType: "JSON"
+    ).done( (d1) => # user created in DB
+      context.redirect("#/sign_up/after")
+    ).error( (d1) -> # cannot create user
+      context.redirect("#/")
+    )
+
+  @get "#/sign_up/after", (context) ->
+    context.app.swap('')
+    context.render("/templates/sign_up/after.haml").appendTo context.$element()
+
+    # $.ajax(
+    #   type: "POST"
+    #   url: "/api/sign_in"
+    #   data: hash
+    #   dataType: "JSON"
+    # ).then ( (d1) -> # user is in DB
+    #   alert(1)
+    #   storeCurrentUser(email, d1['token'])
+    #   context.redirect("#/")
+    # ), ( (d1) -> # try to sign up
+    #   alert(2)
+    #   $.ajax(
+    #     type: "POST"
+    #     url: "/api/sign_up"
+    #     data: hash
+    #     dataType: "JSON"
+    #   ).then (-> # user was created, execute sign in
+    #     $.ajax(
+    #       type: "POST"
+    #       url: "/api/sign_in"
+    #       data: hash
+    #       dataType: "JSON"
+    #     ).then ( (d3) -> # user is in DB, already sign in
+    #       storeCurrentUser(email, d3['token'])
+    #       context.redirect("#/")
+    #     ), (-> # user created but cannot sign in
+    #       alert("Internal error while signing in after sign up")
+    #       context.redirect("#/")
+    #     ), -> # deferred when trying to sign in previously signed up user
+    #       console.log "D3 deferred"
+    #       context.redirect("#/")
+    #   ), (-> # user was not created
+    #     alert("Error while sign up")
+    #     context.redirect("#/")
+    #   ), -> # deferred when trying to sign up
+    #     console.log "D2 deferred"
+    #     context.redirect("#/")
+    # ), -> # deferred when trying to sign in
+    #   alert(3)
+    #   console.log "D1 deferred"
+    #   context.redirect("#/")
 
 
   @get "#/profile", (context) ->
@@ -89,7 +128,7 @@ app = $.sammy("#main", ->
       headers: {"X-Token": cu.auth_token}
     ).then ( (d) -> # profile can be loaded
       context.app.swap('')
-      context.render("/templates/profile.haml", d).appendTo context.$element()
+      context.render("/templates/users/private.haml", {resource: d}).appendTo context.$element()
     ), (-> # profile cannot be loaded
       storeCurrentUser(null, null)
       context.redirect("#/")

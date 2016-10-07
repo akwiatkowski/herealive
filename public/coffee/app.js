@@ -49,53 +49,49 @@
     });
     this.post("#/sign_in/submit", function(context) {
       var email, hash, password;
-      email = this.params['password'];
-      password = this.params['email'];
+      email = this.params['email'];
+      password = this.params['password'];
       hash = {
-        password: email,
-        email: password
+        password: password,
+        email: email
       };
       return $.ajax({
         type: "POST",
         url: "/api/sign_in",
         data: hash,
         dataType: "JSON"
-      }).then((function(d1) {
+      }).done(function(d1) {
         storeCurrentUser(email, d1['token']);
         return context.redirect("#/");
-      }), (function(d1) {
-        return $.ajax({
-          type: "POST",
-          url: "/api/sign_up",
-          data: hash,
-          dataType: "JSON"
-        }).then((function() {
-          return $.ajax({
-            type: "POST",
-            url: "/api/sign_in",
-            data: hash,
-            dataType: "JSON"
-          }).then((function(d3) {
-            storeCurrentUser(email, d3['token']);
-            return context.redirect("#/");
-          }), (function() {
-            alert("Internal error while signing in after sign up");
-            return context.redirect("#/");
-          }), function() {
-            console.log("D3 deferred");
-            return context.redirect("#/");
-          });
-        }), (function() {
-          alert("Error while sign up");
-          return context.redirect("#/");
-        }), function() {
-          console.log("D2 deferred");
-          return context.redirect("#/");
-        });
-      }), function() {
-        console.log("D1 deferred");
+      }).error(function(d1) {
+        storeCurrentUser(null, null);
         return context.redirect("#/");
       });
+    });
+    this.post("#/sign_up/submit", function(context) {
+      var email, hash, password;
+      email = this.params['email'];
+      password = this.params['password'];
+      hash = {
+        password: password,
+        email: email
+      };
+      return $.ajax({
+        type: "POST",
+        url: "/api/sign_up",
+        data: hash,
+        dataType: "JSON"
+      }).done((function(_this) {
+        return function(d1) {
+          return context.redirect("#/sign_up/after");
+        };
+      })(this)).error(function(d1) {
+        return context.redirect("#/");
+      });
+    });
+    this.get("#/sign_up/after", function(context) {
+      context.app.swap('');
+      return context.render("/templates/sign_up/after.haml").appendTo(context.$element());
     });
     this.get("#/profile", function(context) {
       var cu;
@@ -107,7 +103,9 @@
         }
       }).then((function(d) {
         context.app.swap('');
-        return context.render("/templates/profile.haml", d).appendTo(context.$element());
+        return context.render("/templates/users/private.haml", {
+          resource: d
+        }).appendTo(context.$element());
       }), (function() {
         storeCurrentUser(null, null);
         return context.redirect("#/");

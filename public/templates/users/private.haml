@@ -1,0 +1,14 @@
+%h2 Private profile
+
+%h3= resource.email
+
+%p
+  Id
+  = " "
+  %strong
+    = resource.id
+
+%p
+  If you want to allow other to see your public profile share below link
+%p
+  %a{href: "/#/u/" + resource.public_handle} Public Profile

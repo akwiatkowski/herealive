@@ -5,7 +5,8 @@ crystal_model(
   hashed_password : (String | Nil) = nil,
   created_at : (Time | Nil) = nil,
   updated_at : (Time | Nil) = nil,
-  last_sign_in : (Time | Nil) = nil
+  last_sign_in : (Time | Nil) = nil,
+  public_handle : (String | Nil) = nil
 )
 crystal_resource(user, users, User)
 
@@ -33,6 +34,7 @@ struct User
       # mark last time of sign in
       user.not_nil!.update({"last_sign_in" => Time.now})
     end
+
     return uh
   end
 
@@ -58,7 +60,8 @@ struct User
       "email" => email,
       "hashed_password" => hash_password(password),
       "created_at" => Time.now,
-      "updated_at" => Time.now
+      "updated_at" => Time.now,
+      "public_handle" => Crypto::MD5.hex_digest(email.to_s + password.to_s + Time.now.to_s)
     })
   end
 

@@ -26,7 +26,12 @@ end
 
 get "/api/profile" do |env|
   env.response.content_type = "application/json"
-  env.current_user.to_json
+  cu = env.current_user
+  if cu["id"]?
+    User.fetch_one(where: {"id" => cu["id"].to_s.to_i}).to_json
+  else
+    nil.to_json
+  end
 end
 
 post "/api/ping" do |env|

@@ -1,12 +1,7 @@
 %h2
   Hello
-  &nbsp;
+  = " "
   = currentUser.email
 
-%p
-  token
-  &nbsp;
-  %strong
-    = currentUser.auth_token
 
 %a{href: "#/sign_out"} Sign out

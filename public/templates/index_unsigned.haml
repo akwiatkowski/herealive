@@ -14,9 +14,9 @@
       %input{type: "password", name: "password", placeholder: "Password"}
 
     .pure-control-group
-      %label{for: "allow_signup"} Create account if not exists
-      %input{type: "checkbox", name: "allow_signup", checked: true}
+      %label{}
+      %input{type: "submit", onclick:"javascript: form.action='#/sign_in/submit';", value: "Sign in", class: "pure-button pure-button-primary action-execute-button"}
 
     .pure-control-group
       %label{}
-      %input{type: "submit", value: "Sign in", class: "pure-button pure-button-primary action-execute-button"}
+      %input{type: "submit", onclick:"javascript: form.action='#/sign_up/submit';", value: "Sign up", class: "pure-button pure-button-primary action-execute-button"}

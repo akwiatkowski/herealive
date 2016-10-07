@@ -4,5 +4,6 @@
 /.shards/
 
 config/database.yml
+config/secret.txt
 
 bin/run
