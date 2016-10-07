@@ -4,6 +4,33 @@
 
 %p
   Id
-  &nbsp;
+  = " "
   %strong
-  = resource.id
+    = resource.id
+
+%p
+  Last active pings
+  = " "
+  %strong
+    = resource.active_pings.length
+
+%table.pure-table
+  %thead
+    %tr
+      %th Id
+      %th Time
+      %th Lat
+      %th Lon
+      %th Source
+      %th Map
+
+  :each ping in resource.active_pings
+    %tr
+      %td= ping.id
+      %td= new Date(ping.created_at)
+      %td= ping.lat
+      %td= ping.lon
+      %td= ping.source
+      %td
+        %a{href: "http://mapa.ump.waw.pl/ump-www/?zoom=15&lat=" + ping.lat + "&lon=" + ping.lon + "&layers=B000000FFFFTFF&mlat=" + ping.lat + "&mlon=" + ping.lon, target: "_blank"}
+          Map link

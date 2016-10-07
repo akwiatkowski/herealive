@@ -76,25 +76,23 @@ struct User
     return Time.now
   end
 
-  def active_pings(offset = 5, time_offset = Time::Span.new(1, 0, 0))
-    sql = "select * from pings where user_id = #{self.id} order by id DESC offset #{offset} limit 1;"
-    result = Ping.service.execute_sql(sql)
-    pings = crystal_resource_convert_ping(result)
-    if pings.size > 0
-      # get time and fetch
-      if pings[0].created_at
-        time_from = pings[0].created_at.not_nil! - time_offset
-        sql = "select * from pings where user_id = #{self.id} and pings.created_at > #{time_from} order by id DESC;"
-      else
-        sql = "select * from pings where user_id = #{self.id} order by id DESC limit #{offset};"
-      end
+  def active_pings(offset = 5, time_offset = Time::Span.new(12, 0, 0))
+    pings = Ping.fetch_all(
+      where: {
+        "user_id" => self.id
+      },
+      order: "id DESC",
+      limit: 5
+    )
 
-      result = Ping.service.execute_sql(sql)
-      pings = crystal_resource_convert_ping(result)
-      return pings
-    else
-      return pings
-    end
+    time_from = Time.now - time_offset
+    sql = "select * from pings where user_id = #{self.id} and pings.created_at > '#{time_from}' order by id DESC;"
+    result = Ping.service.execute_sql(sql)
+    pings_time = crystal_resource_convert_ping(result)
+
+    pings = (pings + pings_time).uniq.sort{|a,b| b.created_at.not_nil! <=> a.created_at.not_nil! }
+
+    return pings
   end
 
   def public
